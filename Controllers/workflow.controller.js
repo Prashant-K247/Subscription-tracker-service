@@ -64,4 +64,39 @@ const dailyReminderWorkflow = async (context) => {
 
 module.exports = {
     dailyReminder: serve(dailyReminderWorkflow),
+    dailyReminderWorkflow,
 };
+
+// Express handler for creating a subscription (optional) and running the workflow
+exports.reminderCreate = async (req, res, next) => {
+    try {
+        // If request contains subscription payload and user is authenticated, create it
+        const payload = req.body || {};
+        let createdSubscription = null;
+        if (payload.name && payload.price && req.user) {
+            const Subscription = require('../models/subscription.model');
+            createdSubscription = await Subscription.create({
+                name: payload.name,
+                price: payload.price,
+                currency: payload.currency || 'Rupee',
+                frequency: payload.frequency || 'monthly',
+                category: payload.category || 'general',
+                payment: payload.payment || 'Auto debit',
+                startDate: payload.startDate ? new Date(payload.startDate) : new Date(),
+                renewalDate: payload.renewalDate ? new Date(payload.renewalDate) : undefined,
+                user: req.user._id,
+                status: 'active',
+            });
+        }
+
+        // Run the workflow locally (non-QStash invocation)
+        await dailyReminderWorkflow({ run: async (name, fn) => await fn() });
+
+        res.status(200).json({ success: true, message: 'Subscription (optional) created and workflow executed', data: createdSubscription });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// Ensure `reminderCreate` is available on module.exports for route imports
+module.exports.reminderCreate = exports.reminderCreate;

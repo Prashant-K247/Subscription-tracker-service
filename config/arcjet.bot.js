@@ -10,7 +10,7 @@ const ajBot = arcjet({
         detectBot({
             mode: 'LIVE',
             allow: [
-                'CATEGORY:SEARCH_ENGINE', // Google, Bing
+                'CATEGORY:SEARCH_ENGINE', 
             ],
         }),
     ],

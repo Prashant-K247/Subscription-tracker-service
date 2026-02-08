@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const arcjetMiddleware = require('./middleware/arcjet.middleware.js');
 const arcjetBotMiddleware = require('./middleware/arcjetBot.middleware.js');
 const workflowRouter = require('./routes/workflow.routes.js');
+const { dailyReminderWorkflow } = require('./Controllers/workflow.controller');
 
 const app = express();
 
@@ -36,5 +37,22 @@ app.listen(PORT, async () => {
     console.log(`Server is running on http://localhost:${PORT}`);
     await connectdb();
 });
+
+// In-app scheduler: run the reminder workflow once at startup and every 24 hours.
+async function runDailyReminderJob() {
+    try {
+        console.log('Scheduled: running daily reminder workflow');
+        await dailyReminderWorkflow({ run: async (name, fn) => await fn() });
+        console.log('Scheduled: daily reminder run complete');
+    } catch (err) {
+        console.error('Scheduled reminder error:', err && err.message ? err.message : err);
+    }
+}
+
+// Run once after server start
+setImmediate(runDailyReminderJob);
+
+// Schedule every 24 hours
+setInterval(runDailyReminderJob, 24 * 60 * 60 * 1000);
 
 module.exports = app;

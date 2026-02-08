@@ -18,17 +18,7 @@ exports.createSubscription = async (req, res, next) => {
             status: "active",
         });
 
-        // Trigger reminder workflow
-        await workflowClient.trigger({
-            url: `${SERVER_URL}/api/v1/workflows/subscription/reminder`,
-            body: {
-                subscriptionId: subscription._id.toString(),
-            },
-            headers: {
-                "Content-Type": "application/json",
-            },
-            retries: 0,
-        });
+        // Do not auto-trigger the workflow here. Workflow should be invoked explicitly.
 
         res.status(201).json({
             success: true,

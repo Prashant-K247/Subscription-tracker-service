@@ -16,6 +16,9 @@ exports.sendReminderEmail = async ({ to, type, subscription }) => {
         renewalDate: dayjs(subscription.renewalDate).format('DD/MM/YYYY'),
         planName: subscription.name,
         price: `${subscription.price} ${subscription.currency} (${subscription.frequency})`,
+        paymentMethod: subscription.paymentMethod || "Auto debit",
+        accountSettingsLink: "#",
+        supportLink: "#",
     };
 
     const message = template.generateBody(mailInfo);
