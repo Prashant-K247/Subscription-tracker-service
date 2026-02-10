@@ -38,7 +38,7 @@ app.listen(PORT, async () => {
     await connectdb();
 });
 
-// In-app scheduler: run the reminder workflow once at startup and every 24 hours.
+
 async function runDailyReminderJob() {
     try {
         console.log('Scheduled: running daily reminder workflow');
@@ -49,10 +49,9 @@ async function runDailyReminderJob() {
     }
 }
 
-// Run once after server start
+
 setImmediate(runDailyReminderJob);
 
-// Schedule every 24 hours
 setInterval(runDailyReminderJob, 24 * 60 * 60 * 1000);
 
 module.exports = app;
